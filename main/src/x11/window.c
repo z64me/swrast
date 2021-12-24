@@ -1,4 +1,4 @@
-#include "window.h"
+#include <swrast/window.h>
 
 #include <X11/X.h>
 #include <X11/Xlib.h>
@@ -9,24 +9,25 @@
 #include <unistd.h>
 #include <time.h>
 
-struct window {
+struct swr_window {
 	Atom atom_wm_delete;
-	framebuffer fb;
+	struct swr_framebuffer fb;
 	Display* dpy;
 	XImage* img;
 	Window wnd;
 	GC gc;
 };
 
-window *window_create(size_t width, size_t height)
+struct swr_window *
+window_create(size_t width, size_t height)
 {
-	window *wnd = malloc(sizeof(*wnd));
+	struct swr_window *wnd = malloc(sizeof(*wnd));
 	XSizeHints hints;
 
 	if (!wnd)
 		return NULL;
 
-	if (!framebuffer_init(&wnd->fb, width, height))
+	if (!swr_framebuffer_init(&wnd->fb, width, height))
 		goto fail;
 
 	wnd->dpy = XOpenDisplay(0);
@@ -71,23 +72,25 @@ fail_wnd:
 fail_dpy:
 	XCloseDisplay(wnd->dpy);
 fail_fb:
-	framebuffer_cleanup(&wnd->fb);
+	swr_framebuffer_cleanup(&wnd->fb);
 fail:
 	free(wnd);
 	return NULL;
 }
 
-void window_destroy(window *wnd)
+void
+window_destroy(struct swr_window *wnd)
 {
 	XDestroyImage(wnd->img);
 	XFreeGC(wnd->dpy, wnd->gc);
 	XDestroyWindow(wnd->dpy, wnd->wnd);
 	XCloseDisplay(wnd->dpy);
-	framebuffer_cleanup(&wnd->fb);
+	swr_framebuffer_cleanup(&wnd->fb);
 	free(wnd);
 }
 
-int window_handle_events(window *wnd)
+int
+window_handle_events(struct swr_window *wnd)
 {
 	XEvent e;
 
@@ -106,7 +109,8 @@ int window_handle_events(window *wnd)
 	return 1;
 }
 
-void window_display_framebuffer(window *wnd)
+void
+window_display_framebuffer(struct swr_window *wnd)
 {
 	struct timespec tim;
 	struct timespec tim2;
@@ -124,7 +128,9 @@ void window_display_framebuffer(window *wnd)
 	nanosleep(&tim, &tim2);
 }
 
-framebuffer *window_get_framebuffer(window *wnd)
+struct swr_framebuffer *
+window_get_framebuffer(struct swr_window *wnd)
 {
 	return &wnd->fb;
 }
+

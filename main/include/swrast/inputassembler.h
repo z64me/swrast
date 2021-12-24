@@ -19,7 +19,7 @@ extern "C" {
  * \param ctx         A pointer to a context object
  * \param vertexcount The number of vertices to read from the input stream
  */
-void ia_draw_triangles(context *ctx, unsigned int vertexcount);
+void ia_draw_triangles(struct swr_context *ctx, unsigned int vertexcount);
 
 /**
  * \brief Read vertices from the currently vertex & index buffers and send
@@ -29,7 +29,7 @@ void ia_draw_triangles(context *ctx, unsigned int vertexcount);
  * \param vertexcount The number of vertices available (for bounds checking)
  * \param indexcount  The number of indices to read from the index buffer
  */
-void ia_draw_triangles_indexed(context *ctx, unsigned int vertexcount,
+void ia_draw_triangles_indexed(struct swr_context *ctx, unsigned int vertexcount,
 				unsigned int indexcount);
 
 /**
@@ -44,28 +44,28 @@ void ia_draw_triangles_indexed(context *ctx, unsigned int vertexcount,
  *
  * \param ctx A pointer to a context object
  */
-void ia_begin(context *ctx);
+void ia_begin(struct swr_context *ctx);
 
 /**
  * \brief Add a vertex with the previous specified color/normal/texcoord
  *
  * \param ctx A pointer to a context object
  */
-void ia_vertex(context *ctx, float x, float y, float z, float w);
+void ia_vertex(struct swr_context *ctx, float x, float y, float z, float w);
 
 /**
  * \brief Specify the color attribute to use for all future vertices
  *
  * \param ctx A pointer to a context object
  */
-void ia_color(context *ctx, float r, float g, float b, float a);
+void ia_color(struct swr_context *ctx, float r, float g, float b, float a);
 
 /**
  * \brief Specify the normal attribute to use for all future vertices
  *
  * \param ctx A pointer to a context object
  */
-void ia_normal(context *ctx, float x, float y, float z);
+void ia_normal(struct swr_context *ctx, float x, float y, float z);
 
 /**
  * \brief Specify a texture coordinate to use for all future vertices
@@ -73,14 +73,14 @@ void ia_normal(context *ctx, float x, float y, float z);
  * \param ctx   A pointer to a context object
  * \param layer The texture layer index to specify the coordinate for
  */
-void ia_texcoord(context *ctx, int layer, float s, float t);
+void ia_texcoord(struct swr_context *ctx, int layer, float s, float t);
 
 /**
  * \brief Exit immediate mode rendering
  *
  * \param ctx A pointer to a context object
  */
-void ia_end(context *ctx);
+void ia_end(struct swr_context *ctx);
 
 #ifdef __cplusplus
 }

@@ -3,8 +3,8 @@
  *
  * \brief Contains the rendering context implementation
  */
-#ifndef CONTEXT_H
-#define CONTEXT_H
+#ifndef SWR_CONTEXT_H
+#define SWR_CONTEXT_H
 
 #include "predef.h"
 #include "config.h"
@@ -86,7 +86,8 @@ typedef enum {
  *
  * \brief A context encapsulates all global state of the rendering pipeline
  */
-struct context {
+struct swr_context {
+	void *n64ctx;
 	/** \brief Immediate mode rendering state */
 	struct {
 		rs_vertex vertex[3];
@@ -122,7 +123,7 @@ struct context {
 	 * The normalized device coordinates after transformation are mapped
 	 * to lie within the viewport area.
 	 *
-	 * \note Do NOT set this directly, use context_set_viewport.
+	 * \note Do NOT set this directly, use swr_context_set_viewport.
 	 */
 	struct {
 		int x;                  /**< \brief Distance from left */
@@ -133,7 +134,7 @@ struct context {
 
 	/**
 	 * \brief The actual drawing area, computed from the viewport
-	 *        by context_set_viewport
+	 *        by swr_context_set_viewport
 	 */
 	struct {
 		int minx;
@@ -146,6 +147,9 @@ struct context {
 		int index;
 		rs_vertex vtx;
 	} post_tl_cache[MAX_INDEX_CACHE];
+	
+	/* input structure */
+	struct swr_input *input;
 
 	int flags;      /**< \brief A set of CONTEXT_FLAGS */
 
@@ -177,31 +181,35 @@ struct context {
 	unsigned short *indexbuffer;
 
 	/** \brief Which shader program to use */
-	const shader_program *shader;
+	const struct swr_shaderProgram *shader;
 
 	/** \brief Depth value that minimum distance is mapped to */
 	float depth_near;
 
 	/** \brief Depth value that maximum distance is mapped to */
 	float depth_far;
+	
+	/** \brief Offset depth testing values (used for decals) */
+	float depth_ofs;
 
 	/** \brief Frame buffer that the rasterizer draws to */
-	framebuffer *target;
+	struct swr_framebuffer *target;
 
 	/** \brief Color mask determined from flags */
 	color4 colormask;
 };
 
-static MATH_CONST int depth_test(const context* ctx,
+static MATH_CONST int depth_test(const struct swr_context* ctx,
 				const float z, const float ref)
 {
 	int depthtest[8];
 
 	if (ctx->flags & DEPTH_TEST) {
+		float z1 = z + ctx->depth_ofs;
 		depthtest[COMPARE_ALWAYS] = 1;
 		depthtest[COMPARE_NEVER] = 0;
-		depthtest[COMPARE_LESS] = z < ref;
-		depthtest[COMPARE_GREATER] = z > ref;
+		depthtest[COMPARE_LESS] = z1 < ref;
+		depthtest[COMPARE_GREATER] = z1 > ref;
 		depthtest[COMPARE_NOT_EQUAL] = depthtest[COMPARE_LESS] |
 						depthtest[COMPARE_GREATER];
 		depthtest[COMPARE_EQUAL] = !depthtest[COMPARE_NOT_EQUAL];
@@ -232,7 +240,7 @@ extern "C" {
  *
  * \param ctx A pointer to a context
  */
-void context_init(context *ctx);
+void swr_context_init(struct swr_context *ctx);
 
 /**
  * \brief Set the currently active model view matrix and update the
@@ -244,7 +252,7 @@ void context_init(context *ctx);
  * \param f   A pointer to an array of 16 float values, representing a 4x4
  *            matrix, stored in column-major order
  */
-void context_set_modelview_matrix(context *ctx, float *f);
+void swr_context_set_modelview_matrix(struct swr_context *ctx, float *f);
 
 /**
  * \brief Set the currently active projection matrix
@@ -255,7 +263,7 @@ void context_set_modelview_matrix(context *ctx, float *f);
  * \param f   A pointer to an array of 16 float values, representing a 4x4
  *            matrix, stored in column-major order
  */
-void context_set_projection_matrix(context *ctx, float *f);
+void swr_context_set_projection_matrix(struct swr_context *ctx, float *f);
 
 /**
  * \brief Configure viewport mapping
@@ -270,12 +278,12 @@ void context_set_projection_matrix(context *ctx, float *f);
  * \param width  The horizontal extents of the viewport
  * \param height The vertical extents of the viewport
  */
-void context_set_viewport(context *ctx, int x, int y,
+void swr_context_set_viewport(struct swr_context *ctx, int x, int y,
 			unsigned int width, unsigned int height);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* CONTEXT_H */
+#endif /* SWR_CONTEXT_H */
 

@@ -1,10 +1,10 @@
-#include "framebuffer.h"
-#include "context.h"
+#include <swrast/framebuffer.h>
+#include <swrast/context.h>
 #include <stddef.h>
 #include <string.h>
 #include <float.h>
 
-static void recompute_normal_matrix(context *ctx)
+static void recompute_normal_matrix(struct swr_context *ctx)
 {
 	float det, m[16], f[18], *mv, *normal;
 	int i, j;
@@ -69,7 +69,7 @@ static void recompute_normal_matrix(context *ctx)
 	}
 }
 
-void context_init(context *ctx)
+void swr_context_init(struct swr_context *ctx)
 {
 	int i;
 
@@ -102,18 +102,18 @@ void context_init(context *ctx)
 	ctx->flags = DEPTH_CLIP|DEPTH_WRITE|FRONT_CCW;
 }
 
-void context_set_modelview_matrix(context *ctx, float *f)
+void swr_context_set_modelview_matrix(struct swr_context *ctx, float *f)
 {
 	memcpy(ctx->modelview, f, sizeof(float) * 16);
 	recompute_normal_matrix(ctx);
 }
 
-void context_set_projection_matrix(context *ctx, float *f)
+void swr_context_set_projection_matrix(struct swr_context *ctx, float *f)
 {
 	memcpy(ctx->projection, f, sizeof(float) * 16);
 }
 
-void context_set_viewport(context *ctx, int x, int y,
+void swr_context_set_viewport(struct swr_context *ctx, int x, int y,
 			unsigned int width, unsigned int height)
 {
 	ctx->viewport.x = ctx->draw_area.minx = x;

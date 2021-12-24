@@ -1,12 +1,12 @@
-#include "rasterizer.h"
-#include "context.h"
-#include "texture.h"
-#include "shader.h"
+#include <swrast/rasterizer.h>
+#include <swrast/context.h>
+#include <swrast/texture.h>
+#include <swrast/shader.h>
 
 #include <math.h>
 #include <stddef.h>
 
-vec4 blinn_phong(const context *ctx, int i, const vec4 V, const vec4 N)
+vec4 blinn_phong(const struct swr_context *ctx, int i, const vec4 V, const vec4 N)
 {
 	float dist, att, ks, kd;
 	vec4 L, H, cd, cs;
@@ -43,7 +43,7 @@ vec4 blinn_phong(const context *ctx, int i, const vec4 V, const vec4 N)
 	return vec4_add(vec4_scale(cd, kd * att), vec4_scale(cs, ks * att));
 }
 
-static void mv_transform(const context *ctx, rs_vertex *v)
+static void mv_transform(const struct swr_context *ctx, rs_vertex *v)
 {
 	/* transform normal to viewspace */
 	v->attribs[ATTRIB_NORMAL] = vec4_transform(ctx->normalmatrix,
@@ -54,7 +54,7 @@ static void mv_transform(const context *ctx, rs_vertex *v)
 						v->attribs[ATTRIB_POS]);
 }
 
-static vec4 apply_textures(const context *ctx, const rs_vertex *frag)
+static vec4 apply_textures(const struct swr_context *ctx, const rs_vertex *frag)
 {
 	vec4 tex, c = { 1.0f, 1.0f, 1.0f, 1.0f };
 	int i;
@@ -73,8 +73,13 @@ static vec4 apply_textures(const context *ctx, const rs_vertex *frag)
 
 /****************************************************************************/
 
-static void shader_unlit_vertex(const shader_program *prog, const context *ctx,
-				rs_vertex *v)
+static
+void
+shader_unlit_vertex(
+	const struct swr_shaderProgram *prog
+	, const struct swr_context *ctx
+	, rs_vertex *v
+)
 {
 	vec4 V = vec4_transform(ctx->modelview, v->attribs[ATTRIB_POS]);
 	(void)prog;
@@ -83,8 +88,13 @@ static void shader_unlit_vertex(const shader_program *prog, const context *ctx,
 	v->used &= ~(ATTRIB_FLAG_NORMAL|ATTRIB_FLAG_USR0|ATTRIB_FLAG_USR1);
 }
 
-static vec4 shader_unlit_fragment(const shader_program *prog,
-				const context *ctx, const rs_vertex *frag)
+static
+vec4
+shader_unlit_fragment(
+	const struct swr_shaderProgram *prog
+	, const struct swr_context *ctx
+	, const rs_vertex *frag
+)
 {
 	(void)prog;
 	return vec4_mul(apply_textures(ctx, frag),
@@ -93,8 +103,13 @@ static vec4 shader_unlit_fragment(const shader_program *prog,
 
 /****************************************************************************/
 
-static void shader_phong_vertex(const shader_program *prog, const context *ctx,
-				rs_vertex *vert)
+static
+void
+shader_phong_vertex(
+	const struct swr_shaderProgram *prog
+	, const struct swr_context *ctx
+	, rs_vertex *vert
+)
 {
 	vec4 V;
 	int i;
@@ -122,8 +137,13 @@ static void shader_phong_vertex(const shader_program *prog, const context *ctx,
 						vert->attribs[ATTRIB_POS]);
 }
 
-static vec4 shader_phong_fragment(const shader_program *prog,
-				const context *ctx, const rs_vertex *frag)
+static
+vec4
+shader_phong_fragment(
+	const struct swr_shaderProgram *prog
+	, const struct swr_context *ctx
+	, const rs_vertex *frag
+)
 {
 	vec4 color, V, N;
 	int i;
@@ -148,12 +168,12 @@ static vec4 shader_phong_fragment(const shader_program *prog,
 
 /****************************************************************************/
 
-static const shader_program shaders[] = {
+static const struct swr_shaderProgram shaders[] = {
 	{ shader_unlit_vertex, shader_unlit_fragment },
 	{ shader_phong_vertex, shader_phong_fragment },
 };
 
-const shader_program *shader_internal(unsigned int id)
+const struct swr_shaderProgram *shader_internal(unsigned int id)
 {
 	return id < sizeof(shaders)/sizeof(shaders[0]) ? shaders + id : NULL;
 }

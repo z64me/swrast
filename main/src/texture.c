@@ -1,6 +1,6 @@
-#include "texture.h"
-#include "config.h"
-#include "vector.h"
+#include <swrast/texture.h>
+#include <swrast/config.h>
+#include <swrast/vector.h>
 
 #include <stdlib.h>
 

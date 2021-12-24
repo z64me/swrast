@@ -61,7 +61,7 @@ extern "C" {
  * \param v1  The second vertex of the triangle
  * \param v2  The third vertex of the triangle
  */
-void rasterizer_process_triangle(context *ctx, const rs_vertex *v0,
+void rasterizer_process_triangle(struct swr_context *ctx, const rs_vertex *v0,
 				const rs_vertex *v1, const rs_vertex *v2);
 
 #ifdef __cplusplus

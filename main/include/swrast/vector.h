@@ -1,5 +1,5 @@
-#ifndef VECTOR_H
-#define VECTOR_H
+#ifndef SWRAST_VECTOR_H_INCLUDED
+#define SWRAST_VECTOR_H_INCLUDED
 
 #include "predef.h"
 #include <math.h>
@@ -105,5 +105,5 @@ static MATH_CONST vec4 vec4_normalize(const vec4 v)
 	return vec4_scale(v, s);
 }
 
-#endif /* VECTOR_H */
+#endif /* SWRAST_VECTOR_H_INCLUDED */
 

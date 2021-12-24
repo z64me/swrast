@@ -29,7 +29,7 @@ typedef enum {
  *
  * \brief Abstracts entry points of a shader program
  */
-struct shader_program {
+struct swr_shaderProgram {
 	/**
 	 * \brief Run the vertex shader on a vertex
 	 *
@@ -37,8 +37,8 @@ struct shader_program {
 	 * \param ctx  A pointer to a context
 	 * \param vert A pointer to a vertex to process
 	 */
-	void(* vertex )(const shader_program *prog,
-			const context *ctx, rs_vertex *vert);
+	void(* vertex )(const struct swr_shaderProgram *prog,
+			const struct swr_context *ctx, rs_vertex *vert);
 
 	/**
 	 * \brief Run the frament shader on the interpolated vertex attributes
@@ -49,8 +49,8 @@ struct shader_program {
 	 *
 	 * \return A color value for the fragment
 	 */
-	vec4(* fragment )(const shader_program *prog,
-			const context *ctx, const rs_vertex *frag);
+	vec4(* fragment )(const struct swr_shaderProgram *prog,
+			const struct swr_context *ctx, const rs_vertex *frag);
 };
 
 #ifdef __cplusplus
@@ -64,7 +64,7 @@ extern "C" {
  *
  * \return A shader on success, NULL on failure
  */
-const shader_program *shader_internal(unsigned int id);
+const struct swr_shaderProgram *shader_internal(unsigned int id);
 
 /**
  * \brief Helper function for shaders to compute lighting values
@@ -79,7 +79,7 @@ const shader_program *shader_internal(unsigned int id);
  *
  * \return The resulting color value
  */
-vec4 blinn_phong(const context *ctx, int i, const vec4 V, const vec4 N);
+vec4 blinn_phong(const struct swr_context *ctx, int i, const vec4 V, const vec4 N);
 
 #ifdef __cplusplus
 }

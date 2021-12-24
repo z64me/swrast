@@ -1,9 +1,9 @@
-#include "inputassembler.h"
-#include "rasterizer.h"
-#include "context.h"
-#include "config.h"
-#include "shader.h"
-#include "vector.h"
+#include <swrast/inputassembler.h>
+#include <swrast/rasterizer.h>
+#include <swrast/context.h>
+#include <swrast/config.h>
+#include <swrast/shader.h>
+#include <swrast/vector.h>
 #include <math.h>
 
 static MATH_CONST vec4 decode_f2(void *ptr)
@@ -89,7 +89,7 @@ static unsigned char *read_vertex(rs_vertex *v, unsigned char *ptr,
 	return ptr;
 }
 
-static void draw_triangle(context *ctx, rs_vertex *v0, rs_vertex *v1,
+static void draw_triangle(struct swr_context *ctx, rs_vertex *v0, rs_vertex *v1,
 			rs_vertex *v2)
 {
 	ctx->shader->vertex(ctx->shader, ctx, v0);
@@ -99,7 +99,7 @@ static void draw_triangle(context *ctx, rs_vertex *v0, rs_vertex *v1,
 	rasterizer_process_triangle(ctx, v0, v1, v2);
 }
 
-static void invalidate_tl_cache(context *ctx)
+static void invalidate_tl_cache(struct swr_context *ctx)
 {
 	int i;
 
@@ -107,7 +107,7 @@ static void invalidate_tl_cache(context *ctx)
 		ctx->post_tl_cache[i].index = -1;
 }
 
-static void get_cached_index(context *ctx, rs_vertex *v,
+static void get_cached_index(struct swr_context *ctx, rs_vertex *v,
 				unsigned int vsize, unsigned int i)
 {
 	int idx, slot = i % MAX_INDEX_CACHE;
@@ -128,7 +128,7 @@ static void get_cached_index(context *ctx, rs_vertex *v,
 	}
 }
 
-static void draw_triangle_indexed(context *ctx, unsigned int vsize,
+static void draw_triangle_indexed(struct swr_context *ctx, unsigned int vsize,
 				unsigned int i0, unsigned int i1,
 				unsigned int i2)
 {
@@ -141,7 +141,7 @@ static void draw_triangle_indexed(context *ctx, unsigned int vsize,
 	rasterizer_process_triangle(ctx, &v0, &v1, &v2);
 }
 
-void ia_draw_triangles(context *ctx, unsigned int vertexcount)
+void ia_draw_triangles(struct swr_context *ctx, unsigned int vertexcount)
 {
 	void *ptr = ctx->vertexbuffer;
 	rs_vertex v0, v1, v2;
@@ -161,7 +161,7 @@ void ia_draw_triangles(context *ctx, unsigned int vertexcount)
 	}
 }
 
-void ia_draw_triangles_indexed(context *ctx, unsigned int vertexcount,
+void ia_draw_triangles_indexed(struct swr_context *ctx, unsigned int vertexcount,
 				unsigned int indexcount)
 {
 	unsigned int i0, i1, i2, i = 0, vsize = 0;
@@ -209,14 +209,14 @@ void ia_draw_triangles_indexed(context *ctx, unsigned int vertexcount,
 	}
 }
 
-void ia_begin(context *ctx)
+void ia_begin(struct swr_context *ctx)
 {
 	ctx->immediate.next.used = 0;
 	ctx->immediate.current = 0;
 	ctx->immediate.active = 1;
 }
 
-void ia_vertex(context *ctx, float x, float y, float z, float w)
+void ia_vertex(struct swr_context *ctx, float x, float y, float z, float w)
 {
 	if (!ctx->immediate.active)
 		return;
@@ -234,19 +234,19 @@ void ia_vertex(context *ctx, float x, float y, float z, float w)
 			ctx->immediate.vertex + 2);
 }
 
-void ia_color(context *ctx, float r, float g, float b, float a)
+void ia_color(struct swr_context *ctx, float r, float g, float b, float a)
 {
 	ctx->immediate.next.attribs[ATTRIB_COLOR] = vec4_set(r, g, b, a);
 	ctx->immediate.next.used |= ATTRIB_FLAG_COLOR;
 }
 
-void ia_normal(context *ctx, float x, float y, float z)
+void ia_normal(struct swr_context *ctx, float x, float y, float z)
 {
 	ctx->immediate.next.attribs[ATTRIB_NORMAL] = vec4_set(x, y, z, 0.0f);
 	ctx->immediate.next.used |= ATTRIB_FLAG_NORMAL;
 }
 
-void ia_texcoord(context *ctx, int layer, float s, float t)
+void ia_texcoord(struct swr_context *ctx, int layer, float s, float t)
 {
 	ctx->immediate.next.attribs[ATTRIB_TEX0 + layer] =
 		vec4_set(s, t, 0.0f, 1.0f);
@@ -254,7 +254,7 @@ void ia_texcoord(context *ctx, int layer, float s, float t)
 	ctx->immediate.next.used |= (ATTRIB_FLAG_TEX0 << layer);
 }
 
-void ia_end(context *ctx)
+void ia_end(struct swr_context *ctx)
 {
 	ctx->immediate.next.used = 0;
 	ctx->immediate.current = 0;

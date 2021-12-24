@@ -1,9 +1,9 @@
-#include "framebuffer.h"
-#include "rasterizer.h"
-#include "context.h"
-#include "texture.h"
-#include "shader.h"
-#include "color.h"
+#include <swrast/framebuffer.h>
+#include <swrast/rasterizer.h>
+#include <swrast/context.h>
+#include <swrast/texture.h>
+#include <swrast/shader.h>
+#include <swrast/color.h>
 #include <math.h>
 
 
@@ -58,7 +58,7 @@ static void scaled_vertex_add(rs_vertex *V, const rs_vertex *A,
 	}
 }
 
-static void write_fragment(const context *ctx, const color4 frag_color,
+static void write_fragment(const struct swr_context *ctx, const color4 frag_color,
 			   float frag_depth, color4 *color_buffer,
 			   float *depth_buffer)
 {
@@ -76,10 +76,14 @@ static void write_fragment(const context *ctx, const color4 frag_color,
 	}
 
 	if (ctx->flags & DEPTH_WRITE)
-		*depth_buffer = frag_depth;
+	{
+		/* TODO separate w (alpha) channel testing into separate mixer, for performance */
+		if (!(ctx->flags & BLEND_ENABLE) || (ctx->flags & BLEND_ENABLE && frag_color.components[3] > 127))
+			*depth_buffer = frag_depth;
+	}
 }
 
-static void vertex_prepare(rs_vertex *out, const rs_vertex *in, context *ctx)
+static void vertex_prepare(rs_vertex *out, const rs_vertex *in, struct swr_context *ctx)
 {
 	float d, w = 1.0f / in->attribs[ATTRIB_POS].w;
 	int i, j;
@@ -106,7 +110,7 @@ static void vertex_prepare(rs_vertex *out, const rs_vertex *in, context *ctx)
 	out->used = in->used;
 }
 
-static int clip(const context *ctx, const vec4 A, const vec4 B, const vec4 C)
+static int clip(const struct swr_context *ctx, const vec4 A, const vec4 B, const vec4 C)
 {
 	if ((int)A.y > ctx->draw_area.maxy &&
 		(int)B.y > ctx->draw_area.maxy &&
@@ -131,7 +135,7 @@ static int clip(const context *ctx, const vec4 A, const vec4 B, const vec4 C)
 	return 0;
 }
 
-static int cull(const context *ctx, const vec4 A, const vec4 B, const vec4 C)
+static int cull(const struct swr_context *ctx, const vec4 A, const vec4 B, const vec4 C)
 {
 	int ccw, cullccw = 0, cullcw = 0;
 
@@ -150,7 +154,7 @@ static int cull(const context *ctx, const vec4 A, const vec4 B, const vec4 C)
 	return (ccw && cullccw) || (!ccw && cullcw);
 }
 
-static void draw_scanline(int y, context *ctx, const edge_data *s)
+static void draw_scanline(int y, struct swr_context *ctx, const edge_data *s)
 {
 	float sub_pixel, z, w, *z_buffer;
 	color4 *start, *end;
@@ -228,7 +232,7 @@ static void advance_line(edge_data *s, float scale)
 }
 
 static void draw_half_triangle(edge_data *s, const rs_vertex *A,
-			       const rs_vertex *B, context *ctx)
+			       const rs_vertex *B, struct swr_context *ctx)
 {
 	int y0, y1;
 
@@ -251,7 +255,7 @@ static void draw_half_triangle(edge_data *s, const rs_vertex *A,
 }
 
 static void draw_triangle(const rs_vertex *A, const rs_vertex *B,
-			  const rs_vertex *C, context *ctx)
+			  const rs_vertex *C, struct swr_context *ctx)
 {
 	float temp[4];
 	edge_data s;
@@ -308,7 +312,7 @@ static void draw_triangle(const rs_vertex *A, const rs_vertex *B,
 	}
 }
 
-void rasterizer_process_triangle(context *ctx, const rs_vertex *v0,
+void rasterizer_process_triangle(struct swr_context *ctx, const rs_vertex *v0,
 				const rs_vertex *v1, const rs_vertex *v2)
 {
 	const rs_vertex *temp_v;
