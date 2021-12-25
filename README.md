@@ -14,6 +14,14 @@ It has since been succeeded by [z64viewer](https://github.com/z64me/z64viewer).
  - Texture blending
  - Shiny surfaces
 
+## Screenshots
+
+![screenshot](forest.png)
+
+![screenshot](town.png)
+
+![screenshot](dungeon.png)
+
 ## Usage
 
 ```
