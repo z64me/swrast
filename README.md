@@ -1,5 +1,7 @@
 # zzviewer-rrw
 
+![screenshot](shiny.gif)
+
 `zzviewer-rrw` (re-rewritten) was the third and final iteration of `zzviewer`: a Nintendo 64 model viewer for Zelda games. Unlike its predecessors, this one primarily used software rasterization to display geometry, but was intended to eventually have OpenGL bindings.
 
 It has since been succeeded by [z64viewer](https://github.com/z64me/z64viewer).
