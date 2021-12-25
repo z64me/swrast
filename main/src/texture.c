@@ -29,7 +29,7 @@ void texture_destroy(texture *t)
 	free(t);
 }
 
-vec4 texture_sample(const texture *t, const vec4 tc)
+MATH_CONST vec4 texture_sample(const texture *t, const vec4 tc)
 {
 	const unsigned char *ptr;
 	unsigned int X, Y;
